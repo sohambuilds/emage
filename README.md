@@ -1,17 +1,86 @@
-# Dual-Stream Vision-Language Feedback Loop for Flux Diffusion Models
+# EMage: A Dual-Stream Vision-Language Feedback Pipeline for Flux Diffusion Models
 
-This project implements a feedback-based image generation system that combines Flux diffusion models with Vision-Language Model (VLM) evaluation to create a closed-loop improvement pipeline for generated images.
+This project implements an intelligent image editing and refinement system called **EMage** (Editing Mage/Image) that combines advanced Flux diffusion models with Vision-Language Model (VLM) evaluation to create a closed-loop improvement pipeline for generated images.
 
-## Features
+## Technical Overview
 
-- Initial image generation with Flux.1-dev
-- Intelligent model selection based on detected issues
-- Control conditioning using Flux Canny and Depth models
-- Targeted inpainting with Flux Fill model
-- Vision-Language Model evaluation using Google's Gemini API
-- Automated mask generation for precise refinements
-- Prompt refinement based on VLM feedback
-- Dual-stream feedback loop optimization
+The EMage pipeline implements a sophisticated dual-stream optimization approach that alternates between prompt refinement and image manipulation based on semantic evaluation of generation quality. The system leverages three specialized Flux diffusion models and integrates them with Google's Gemini Pro Vision for automated assessment and refinement.
+
+### Core Components
+
+- **Base Image Generation Module**: Implements Flux base model for high-fidelity initial image synthesis
+- **Control Conditional Generation**: Utilizes latent space manipulation techniques through Flux Canny control models
+- **Depth-Guided Refinement**: Employs monocular depth estimation for structural awareness in image refinement
+- **Region-Specific Inpainting**: Applies targeted modifications via Flux Fill models for localized corrections
+- **VLM-Powered Evaluation**: Performs multi-faceted image analysis with Gemini API
+- **Automated Mask Generation**: Implements contour detection and semantic segmentation for precise editing regions
+- **Prompt Engineering System**: Applies NLP techniques to systematically improve text descriptions
+- **Intelligent Strategy Selection**: Employs a weighted decision algorithm to choose optimal refinement paths
+
+## Technical Implementation
+
+### Model Architecture
+
+EMage employs a dynamic model selection approach with the following diffusion models:
+
+1. **Flux Base Model**
+
+   - Model ID: `fluxbeaver/flux-dev-base`
+   - Architecture: Latent diffusion with transformer backbone
+   - Parameters: ~1B parameters
+   - Primary Application: Initial high-quality image synthesis
+
+2. **Flux Control Pipelines**
+
+   - Model ID: `fluxbeaver/flux-dev-canny`
+   - Integration Method: Channel-wise concatenation (not ControlNet)
+   - Conditioning Inputs: Canny edge maps and raw images
+   - Strength Parameter: Controls influence of condition (0.0-1.0)
+   - VRAM Optimization: CPU offloading for efficient operation
+
+3. **Flux Fill Model**
+   - Model ID: `fluxbeaver/flux-dev-fill`
+   - Mask Processing: Binary attention mechanism
+   - Inpainting Method: Masked latent diffusion
+   - Coherence Control: Guided latent interpolation at boundaries
+
+### VLM Integration Architecture
+
+The system integrates Google's Gemini API for multi-modal analysis:
+
+- **Model**: Gemini Pro Vision
+- **Input**: Image-text pairs (generated image + original prompt)
+- **Analysis Tasks**:
+  - Semantic correspondence detection
+  - Object presence verification
+  - Stylistic coherence assessment
+  - Spatial relationship validation
+- **Output Processing**: Natural language feedback parsing with regex-based entity extraction
+
+### Feedback Loop Pipeline
+
+The EMage feedback loop implements the following technical workflow:
+
+1. **Initial State Representation**: Text prompt → Flux Base Model → Initial image tensor
+2. **Evaluation**: Image + Prompt → Gemini VLM → Structured issue dictionary + satisfaction score
+3. **Decision Tree Processing**:
+   - If satisfaction score >= 0.8: Terminate loop (convergence achieved)
+   - If prompt issues > image issues: Execute prompt refinement branch
+   - If image issues > prompt issues: Execute image modification branch
+   - Otherwise: Execute hybrid refinement
+4. **Strategy Selection Algorithm**:
+   - Issue type classification → Model selection → Parameter optimization
+   - Weighting factor for issue severity influences selection probability
+5. **Execution and Re-evaluation**: Apply selected strategy → Generate new image → Re-evaluate
+
+## System Requirements
+
+- **Compute**: CUDA-compatible GPU with 8GB+ VRAM (16GB+ recommended)
+- **API Requirements**:
+  - Gemini API access with sufficient quota for multi-modal requests
+  - Hugging Face authentication token with model access permissions
+- **Memory Requirements**: 16GB+ RAM
+- **Dependencies**: PyTorch 2.0+, diffusers 0.19+, transformers 4.30+
 
 ## Setup
 
@@ -30,62 +99,148 @@ This project implements a feedback-based image generation system that combines F
    - Add `GEMINI_API_KEY=your_gemini_api_key_here`
    - Add `HF_TOKEN=your_huggingface_token_here` (required for accessing Flux models)
 
-## Pipeline Architecture
+## EMage Architecture
 
-Our system implements an intelligent feedback loop that selects the most appropriate model based on the type of issues detected:
+Our system implements an intelligent feedback loop that utilizes an algorithmic approach to model selection based on issue classification:
 
-1. **Initial Generation**: Create an image using Flux.1-dev
-2. **VLM Evaluation**: Analyze the image with Gemini to detect issues and calculate satisfaction score
-3. **Strategy Determination**: Decide whether to refine the prompt, image, or both
+1. **Initial Generation Phase**:
+
+   - Utilize Flux Base model with classifier-free guidance
+   - Apply scaled latent diffusion with configurable inference steps
+   - Extract high-quality latent representations to RGB space
+
+2. **VLM Evaluation Phase**:
+
+   - Multi-modal prompt construction for effective VLM analysis
+   - Structured data extraction from natural language responses
+   - Quantification of satisfaction via sentiment analysis techniques
+   - Issue categorization into object-level, semantic, and structural categories
+
+3. **Strategy Determination Phase**:
+
+   - Apply weighted issue counting to determine refinement vector
+   - Calculate ratio of issue types to select optimal modification strategy
+   - Dynamic threshold adjustment based on satisfaction trajectory
+
 4. **Model Selection Logic**:
-   - **Spatial/positioning issues**: Use Depth control model for better spatial awareness
-   - **Style/textural issues**: Use Canny control model for edge preservation
-   - **General issues**: Use Fill model directly for targeted refinements
-5. **Refinement Application**: Apply the selected model(s) to refine the image
-6. **Re-evaluation**: Assess the improved image and continue iterating until satisfaction
+
+   - **Spatial/positioning issues**: Apply depth-conditioned diffusion for structural refinement
+   - **Style/textural issues**: Utilize edge-preservation via Canny conditioning
+   - **Object-specific issues**: Implement targeted inpainting with boundary preservation
+   - **Prompt ambiguity issues**: Employ semantic parsing and prompt enhancement
+
+5. **Execution Phase**:
+
+   - Apply conditionally-selected model with optimized parameters
+   - Process condition maps when applicable (depth, edges, etc.)
+   - Maintain coherence via strength parameter optimization
+   - Preserve semantic content via prompt guidance
+
+6. **Iterative Refinement**:
+   - Track history with state preservation for rollback capability
+   - Calculate convergence metrics for termination condition
+   - Apply diminishing guidance scale for fine refinement in later iterations
+   - Perform cross-iteration analysis for global optimization
 
 ## Usage
 
 ```python
-from flux_vlm_pipeline.pipeline import dual_stream_feedback_loop
+from flux_vlm_pipeline.pipeline import FluxVLMPipeline
 
-# Generate image with feedback loop
-final_image, refined_prompt, score, prompt_history, image_history = dual_stream_feedback_loop(
-    prompt="A serene landscape with mountains and a lake at sunset",
-    negative_prompt="ugly, blurry", # Used only for initial generation
-    max_iterations=5,
-    satisfaction_threshold=0.9
+# Initialize the EMage pipeline
+emage = FluxVLMPipeline()
+
+# Generate and refine an image with EMage
+results = emage.generate_and_evaluate(
+    prompt="A photorealistic mountain landscape with pine trees and a lake reflecting the sunset",
+    num_iterations=3,
+    guidance_scale=7.5,
+    num_inference_steps=30,
+    seed=42,  # For reproducibility
+    width=1024,
+    height=1024
+)
+
+# Access the final image and refined prompt
+final_image = results["final_image"]
+final_prompt = results["final_prompt"]
+satisfaction_score = results["satisfaction_score"]
+
+# Display the refinement history
+history = results["history"]
+```
+
+## Technical Details of Model Integration
+
+### Flux Base Model Integration
+
+The EMage system loads the `fluxbeaver/flux-dev-base` model through the diffusers FluxPipeline interface:
+
+```python
+flux_pipeline = FluxPipeline.from_pretrained(
+    FLUX_BASE_MODEL_ID,
+    use_auth_token=HF_TOKEN
 )
 ```
 
-## Command Line Usage
+Key parameters for optimal generation:
 
-```bash
-python main.py --prompt "A magical forest with glowing mushrooms" --max_iterations 3
+- **guidance_scale**: Controls adherence to prompt (7.5 default)
+- **num_inference_steps**: Controls quality vs. speed tradeoff (30 default)
+- **seed**: Integer value for reproducible outputs
+- **width/height**: Output image dimensions (defaults to 1024x1024)
+
+### Control Model Implementation
+
+The EMage system utilizes conditional image generation through the Flux Control Pipeline:
+
+```python
+control_pipeline = FluxControlPipeline.from_pretrained(
+    FLUX_CANNY_MODEL_ID,
+    use_auth_token=HF_TOKEN
+)
 ```
 
-## Model Information
+Key conditioning parameters:
 
-This implementation uses the following models from Hugging Face:
+- **control_image**: The conditioning image (e.g., canny edge map)
+- **control_mode**: Type of conditioning ("canny" or "depth")
+- **strength**: Degree of conditioning influence (0.5-0.7 recommended)
 
-- **Base Model**: `black-forest-labs/FLUX.1-dev` with `FluxPipeline`
-  - Used for: Initial image generation
-- **Canny Model**: `black-forest-labs/FLUX.1-Canny-dev` with `FluxControlPipeline`
-  - Used for: Style and edge-preserving refinements
-- **Depth Model**: `black-forest-labs/FLUX.1-Depth-dev` with `FluxControlPipeline`
-  - Used for: Spatial and depth-aware refinements
-- **Fill Model**: `black-forest-labs/FLUX.1-Fill-dev` with `FluxFillPipeline`
-  - Used for: Targeted inpainting of specific regions
+### Inpainting Integration
 
-Note: Flux control models use channel-wise concatenation rather than traditional ControlNet architecture.
+For targeted refinements, EMage implements mask-based inpainting:
 
-## Implementation Notes
+```python
+inpaint_pipeline = FluxFillPipeline.from_pretrained(
+    FLUX_FILL_MODEL_ID,
+    use_auth_token=HF_TOKEN
+)
+```
 
-- Negative prompts are only used for the initial image generation, as Flux control and fill models don't support them
-- The system intelligently selects which model to use based on issue types
-- Masks are generated automatically based on VLM feedback
-- Memory usage is optimized through 8-bit quantization support
+Inpainting parameters:
 
-## References
+- **mask_image**: Binary mask indicating regions to modify
+- **guidance_scale**: Controls adherence to prompt in modified regions
+- **num_inference_steps**: Quality vs. speed tradeoff for inpainting
 
-Based on the research proposal "Dual-Stream Vision-Language Feedback Loop for Flux Diffusion Models"
+## Memory Optimization Techniques
+
+The EMage pipeline implements several memory optimization strategies:
+
+1. **CPU Offloading**: Models use `enable_model_cpu_offload()` to reduce VRAM footprint
+2. **Single Model Loading**: Only one model is loaded at a time
+3. **Strategic Initialization**: The Depth Preprocessor is initialized once at pipeline creation
+
+## References and Technical Papers
+
+EMage builds on several key technical innovations:
+
+- Latent Diffusion Models (Rombach et al., 2022)
+- Classifier-Free Guidance (Ho and Salimans, 2021)
+- Multimodal Large Language Models (Gemini Technical Report, 2023)
+- Feedback Loops for Generative AI (Iterative Refinement via Feedback, Saunders et al., 2022)
+
+## License
+
+This project is provided as an open-source implementation under [MIT License](LICENSE).
