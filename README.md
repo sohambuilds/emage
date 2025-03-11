@@ -75,7 +75,7 @@ The EMage feedback loop implements the following technical workflow:
 
 ## System Requirements
 
-- **Compute**: CUDA-compatible GPU with 8GB+ VRAM (16GB+ recommended)
+- **Compute**: CUDA-compatible GPU with 24GB+ VRAM 
 - **API Requirements**:
   - Gemini API access with sufficient quota for multi-modal requests
   - Hugging Face authentication token with model access permissions
