@@ -19,9 +19,9 @@ if not HF_TOKEN:
     print("WARNING: HF_TOKEN not found in environment variables. Model loading may fail.")
 
 # Model IDs
-FLUX_BASE_MODEL_ID = "fluxbeaver/flux-dev-base"
-FLUX_CANNY_MODEL_ID = "fluxbeaver/flux-dev-canny"
-FLUX_FILL_MODEL_ID = "fluxbeaver/flux-dev-fill"
+FLUX_BASE_MODEL_ID = "black-forest-labs/FLUX.1-dev"
+FLUX_CANNY_MODEL_ID = "black-forest-labs/FLUX.1-Canny-dev"
+FLUX_FILL_MODEL_ID = "black-forest-labs/FLUX.1-Fill-dev"
 
 # Pipeline parameters
 DEFAULT_MAX_ITERATIONS = 3

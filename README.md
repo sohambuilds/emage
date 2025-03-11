@@ -25,24 +25,31 @@ EMage employs a dynamic model selection approach with the following diffusion mo
 
 1. **Flux Base Model**
 
-   - Model ID: `fluxbeaver/flux-dev-base`
-   - Architecture: Latent diffusion with transformer backbone
-   - Parameters: ~1B parameters
+   - Model ID: `black-forest-labs/FLUX.1-dev`
+   - Architecture: Advanced latent diffusion with transformer backbone
+   - Parameters: ~12B parameters
    - Primary Application: Initial high-quality image synthesis
+   - Features: State-of-the-art text-to-image generation capabilities
 
-2. **Flux Control Pipelines**
+2. **Flux Canny Control Model**
 
-   - Model ID: `fluxbeaver/flux-dev-canny`
+   - Model ID: `black-forest-labs/FLUX.1-Canny-dev`
+   - Architecture: Specialized control model with edge conditioning
+   - Parameters: ~12B parameters
    - Integration Method: Channel-wise concatenation (not ControlNet)
    - Conditioning Inputs: Canny edge maps and raw images
    - Strength Parameter: Controls influence of condition (0.0-1.0)
    - VRAM Optimization: CPU offloading for efficient operation
 
 3. **Flux Fill Model**
-   - Model ID: `fluxbeaver/flux-dev-fill`
+   - Model ID: `black-forest-labs/FLUX.1-Fill-dev`
+   - Architecture: Inpainting-optimized latent diffusion
+   - Parameters: ~12B parameters
    - Mask Processing: Binary attention mechanism
    - Inpainting Method: Masked latent diffusion
    - Coherence Control: Guided latent interpolation at boundaries
+
+All Flux models are built on the same core architecture with specialized training for their respective tasks. Each model contains approximately 12 billion parameters and implements advanced attention mechanisms for high-quality image generation and manipulation.
 
 ### VLM Integration Architecture
 
@@ -75,7 +82,7 @@ The EMage feedback loop implements the following technical workflow:
 
 ## System Requirements
 
-- **Compute**: CUDA-compatible GPU with 24GB+ VRAM 
+- **Compute**: CUDA-compatible GPU with 24GB+ VRAM
 - **API Requirements**:
   - Gemini API access with sufficient quota for multi-modal requests
   - Hugging Face authentication token with model access permissions
