@@ -181,7 +181,7 @@ history = results["history"]
 
 ### Flux Base Model Integration
 
-The EMage system loads the `fluxbeaver/flux-dev-base` model through the diffusers FluxPipeline interface:
+The EMage system loads the `black-forest-labs/FLUX.1-dev` model through the diffusers FluxPipeline interface:
 
 ```python
 flux_pipeline = FluxPipeline.from_pretrained(
